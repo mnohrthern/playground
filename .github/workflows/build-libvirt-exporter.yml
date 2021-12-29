@@ -1,0 +1,35 @@
+name: Go
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        repository: zhangjianweibj/prometheus-libvirt-exporter
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17.5
+        
+    - name: set version
+      run: echo "META_VERSION=$(cat VERSION).$(date -u +.%Y%m%d.%H%M%S)" >> $GITHUB_ENV
+      
+    - name: prepare
+      run: go mod vendor && go mod tidy
+
+    - name: Build
+      run: env GOOS=linux GOARCH=amd64 go build -v -ldflags \
+        "-w -s -X prometheus-libvirt-exporter/meta.Version=${{ env.META_VERSION }}" \
+        -o prometheus-libvirt-exporter
+
+    - name: upload binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: prometheus-libvirt-exporter-${{ env.META_VERSION }}
+        path: prometheus-libvirt-exporter
