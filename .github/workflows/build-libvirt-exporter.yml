@@ -1,4 +1,4 @@
-name: Go
+name: Build libvirt exporter binary
 
 on:
   workflow_dispatch:
