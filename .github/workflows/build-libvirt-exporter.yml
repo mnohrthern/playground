@@ -24,9 +24,10 @@ jobs:
       run: go mod vendor && go mod tidy
 
     - name: Build
-      run: env GOOS=linux GOARCH=amd64 go build -v -ldflags \
-        "-w -s -X prometheus-libvirt-exporter/meta.Version=${{ env.META_VERSION }}" \
-        -o prometheus-libvirt-exporter
+      run: |
+        env GOOS=linux GOARCH=amd64 go build -v -ldflags \
+          "-w -s -X prometheus-libvirt-exporter/meta.Version=${{ env.META_VERSION }}" \
+          -o prometheus-libvirt-exporter
 
     - name: upload binary
       uses: actions/upload-artifact@v2
