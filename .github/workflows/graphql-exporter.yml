@@ -19,7 +19,7 @@ jobs:
     
     # Original source code doesn't provide any version infos
     - name: set version
-      run: echo "VERSION=$(date -u +.%Y%m%d.%H%M%S)" >> $GITHUB_ENV
+      run: echo "VERSION=$(date -u +%Y%m%d.%H%M%S)" >> $GITHUB_ENV
 
     - name: Build
       run: |
