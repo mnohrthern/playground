@@ -15,13 +15,19 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.17.5
+        go-version: 1.17.6
+    
+    # Original source code doesn't provide any version infos
+    - name: set version
+      run: echo "VERSION=$(date -u +.%Y%m%d.%H%M%S)" >> $GITHUB_ENV
 
     - name: Build
-      run: make
+      run: |
+        make fmt
+        CGO_ENABLED=0 go build -o bin/prometheus-graphql-exporter-${{ env.VERSION }}
 
     - name: upload binary
       uses: actions/upload-artifact@v2
       with:
-        name: graphql_exporter
+        name: prometheus-graphql-exporter-${{ env.VERSION }}
         path: bin
