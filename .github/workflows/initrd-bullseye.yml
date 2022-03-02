@@ -8,6 +8,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: set version for our new initrd
+        run: echo "INITRD_VERSION=bullseye-$(date -u +%Y%m%d.%H%M%S)" >> $GITHUB_ENV
+        
       - name: Download bullseye initrd
         run: curl -OL https://ftp.gwdg.de/pub/linux/debian/debian/dists/bullseye/main/installer-amd64/current/images/netboot/debian-installer/amd64/initrd.gz
       
@@ -30,14 +33,12 @@ jobs:
 
       - name: Build the new initrd
         working-directory: ./ramdisk
-        run: |
-          echo "INITRD_VERSION=$(date -u +%Y%m%d.%H%M%S)" >> $GITHUB_ENV
-          sudo find . | cpio --create --format='newc' > ../nd-initrd-bullseye-${{ env.INITRD_VERSION }}
+        run: sudo find . | cpio --create --format='newc' > ../nd-initrd-${{ env.INITRD_VERSION }}
       
       - name: compress new initrd file
-        run: gzip nd-initrd-bullseye-${{ env.INITRD_VERSION }}
+        run: gzip nd-initrd-${{ env.INITRD_VERSION }}
       
       - name: upload initrd
         uses: actions/upload-artifact@v2
         with:
-          name: nd-initrd-bullseye-${{ env.INITRD_VERSION }}
+          name: nd-initrd-${{ env.INITRD_VERSION }}
