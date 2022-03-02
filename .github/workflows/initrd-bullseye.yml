@@ -33,12 +33,13 @@ jobs:
 
       - name: Build the new initrd
         working-directory: ./ramdisk
-        run: sudo find . | cpio --create --format='newc' > ../nd-initrd-${{ env.INITRD_VERSION }}
+        run: sudo find . | cpio --create --format='newc' > ../nd-initrd
       
       - name: compress new initrd file
-        run: gzip nd-initrd-${{ env.INITRD_VERSION }}
+        run: gzip nd-initrd
       
       - name: upload initrd
         uses: actions/upload-artifact@v2
         with:
           name: nd-initrd-${{ env.INITRD_VERSION }}
+          path: nd-initrd
