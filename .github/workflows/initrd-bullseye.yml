@@ -14,24 +14,28 @@ jobs:
       - name: Unzip initrd
         run: gunzip initrd
       
-      - name: create directory and cd into it
-        run: mkdir ramdisk && cd ramdisk
+      - name: create directory
+        run: mkdir ramdisk
       
       - name: extract initrd files to ramdisk folder
+        working-directory: ./ramdisk
         run: sudo cpio -id < ../initrd
         
       # Problem: If we send a SIGTERM to dhcp6c, it will release our IPv6 address we received via DHCPv6
       # Fix: Instead of sending a SIGTERM, we directly send a SIGKILL
       # because all DHCP agents must be stopped for the installer to proceed.
       - name: update kill-all-dhcp file
+        working-directory: ./ramdisk
         run: sudo sed -i s/-TERM/-KILL/g bin/kill-all-dhcp
 
       - name: Build the new initrd
+        working-directory: ./ramdisk
         run: |
           echo "INITRD_VERSION=$(date -u +%Y%m%d.%H%M%S)" >> $GITHUB_ENV
           sudo find . | cpio --create --format='newc' > ../nd-initrd-bullseye-${{ env.INITRD_VERSION }}
-          cd ..
-          gzip nd-initrd-bullseye-${{ env.INITRD_VERSION }}
+      
+      - name: compress new initrd file
+        run: gzip nd-initrd-bullseye-${{ env.INITRD_VERSION }}
       
       - name: upload initrd
         uses: actions/upload-artifact@v2
