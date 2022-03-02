@@ -41,5 +41,5 @@ jobs:
       - name: upload initrd
         uses: actions/upload-artifact@v2
         with:
-          name: nd-initrd-${{ env.INITRD_VERSION }}
-          path: nd-initrd
+          name: nd-initrd-${{ env.INITRD_VERSION }}.gz
+          path: nd-initrd.gz
