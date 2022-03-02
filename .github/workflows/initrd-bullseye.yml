@@ -10,36 +10,37 @@ jobs:
     steps:
       - name: set version for our new initrd
         run: echo "INITRD_VERSION=bullseye-$(date -u +%Y%m%d.%H%M%S)" >> $GITHUB_ENV
-        
+
       - name: Download bullseye initrd
         run: curl -OL https://ftp.gwdg.de/pub/linux/debian/debian/dists/bullseye/main/installer-amd64/current/images/netboot/debian-installer/amd64/initrd.gz
-      
+
       - name: Unzip initrd
         run: gunzip initrd
-      
+
       - name: create directory
         run: mkdir ramdisk
-      
+
       - name: extract initrd files to ramdisk folder
         working-directory: ./ramdisk
         run: sudo cpio -id < ../initrd
-        
-      # Problem: If we send a SIGTERM to dhcp6c, it will release our IPv6 address we received via DHCPv6
-      # Fix: Instead of sending a SIGTERM, we directly send a SIGKILL
-      # because all DHCP agents must be stopped for the installer to proceed.
+
+      # Problem: The script we update here sends a SIGTERM to dhcp6c,
+      #          but this will release our IPv6 address we received via DHCPv6 before.
+      # Fix:     Instead of sending a SIGTERM, we directly send a SIGKILL,
+      #          because all DHCP agents must be stopped for the installer to proceed.
       - name: update kill-all-dhcp file
         working-directory: ./ramdisk
         run: sudo sed -i s/-TERM/-KILL/g bin/kill-all-dhcp
 
       - name: Build the new initrd
         working-directory: ./ramdisk
-        run: sudo find . | cpio --create --format='newc' > ../nd-initrd
-      
+        run: sudo find . | cpio --create --format='newc' > ../nd-initrd-${{ env.INITRD_VERSION }}
+
       - name: compress new initrd file
-        run: gzip nd-initrd
-      
+        run: gzip nd-initrd-${{ env.INITRD_VERSION }}
+
       - name: upload initrd
         uses: actions/upload-artifact@v2
         with:
           name: nd-initrd-${{ env.INITRD_VERSION }}.gz
-          path: nd-initrd.gz
+          path: nd-initrd-${{ env.INITRD_VERSION }}.gz
